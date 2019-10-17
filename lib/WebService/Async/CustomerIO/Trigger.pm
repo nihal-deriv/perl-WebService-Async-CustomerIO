@@ -20,7 +20,7 @@ use Carp qw();
 Creates a new api client object
 
 Parameters:
-- campaing_id
+- campaign_id
 - api_client
 
 =cut
@@ -28,9 +28,9 @@ Parameters:
 sub new {
     my ($cls, %param) = @_;
 
-    $param{$_} or Carp::croak "Missing requered argument $_" for (qw(campaing_id api_client));
+    $param{$_} or Carp::croak "Missing required argument: $_" for (qw(campaign_id api_client));
 
-    my $self = +{map { $_ => $param{$_} } qw(campaing_id api_client)};
+    my $self = +{map { $_ => $param{$_} } keys %param };
 
     bless $self, $cls;
 
@@ -49,11 +49,11 @@ sub api {shift->{api_client}}
 
 sub id {shift->{id}}
 
-=head2 campaing_id
+=head2 campaign_id
 
 =cut
 
-sub campaing_id {shift->{campaing_id}}
+sub campaign_id {shift->{campaign_id}}
 
 =head2 activate(%param) -> Future($obj)
 
@@ -64,42 +64,37 @@ Trigger broadcast campaign
 sub activate {
     my ($self, %param) = @_;
 
-    Carp::croak 'This trigger is already activated' if $self->id
-                                                    || $self->{__activation_lock};
+    Carp::croak 'This trigger is already activated' if $self->id;
 
-    $self->{__activation_lock} = 1;
-
-    my $campaing_id = $self->campaing_id;
+    my $campaign_id = $self->campaign_id;
     return $self->api
-                ->api_request(POST => "campaings/$campaing_id/triggers")
+                ->api_request(POST => "campaigns/$campaign_id/triggers")
                 ->then(sub{
                     my ($response) = @_;
 
-                    delete $self->{__activation_lock};
-
-                    return Future->fail("UNEXPECTED_RESPONSE_FORMAT", $response) 
+                    return Future->fail("UNEXPECTED_RESPONSE_FORMAT", $response)
                         if !defined $response->{id};
 
                     $self->{id} = $response->{id};
 
-                    return Future->done($self);
+                    return Future->done($response);
                 });
 }
 
 
-=head2 find($api_client, $campaing_id, $trigger_id) -> Future($obj)
+=head2 find($api_client, $campaign_id, $trigger_id) -> Future($obj)
 
 Retrieve status of a broadcast
 
 =cut
 
 sub find {
-    my ($cls, $api, $campaing_id, $trigger_id) = @_;
+    my ($cls, $api, $campaign_id, $trigger_id) = @_;
 
-    return $api->api_request(GET => "campaigns/$campaing_id/triggers/$trigger_id")
+    return $api->api_request(GET => "campaigns/$campaign_id/triggers/$trigger_id")
                ->then(sub{
                    my ($result) = @_;
-                   my $trigger = $cls->new(%{$result});
+                   my $trigger = $cls->new(%{$result}, api_client => $api);
                    return Future->done($trigger);
                });
 }
@@ -114,7 +109,7 @@ sub get_errors {
     my($self, $start, $limit) = @_;
 
     my $trigger_id = $self->id;
-    my $campaing_id = $self->campaing_id;
+    my $campaign_id = $self->campaign_id;
 
     Carp::croak 'Trying to get errors for unsaved trigger' unless defined $trigger_id;
     Carp::croak "Invalid value for start $start" if defined $start && int($start) < 0;
@@ -123,7 +118,7 @@ sub get_errors {
 
     return $self->api
                 ->api_request(
-                    GET => "campaigns/$campaing_id/triggers/$trigger_id/errors",
+                    GET => "campaigns/$campaign_id/triggers/$trigger_id/errors",
                     {
                         (defined $start ? (start => int($start)) : ()),
                         (defined $limit ? (limit => int($limit)) : ()),
