@@ -47,8 +47,6 @@ It returns future, when slot will be avalible, then fututre will be resolved.
 sub acquire {
     my ($self) = @_;
 
-    return Future->done unless $self->limit;
-
     $self->_start_timer;
     return Future->done if ++$self->{counter} <= $self->limit;
 
@@ -60,7 +58,8 @@ sub acquire {
 sub _current_queue {
     my ($self) = @_;
 
-    my $pos = int(($self->{counter} - $self->limit) / $self->limit);
+    # +1 for getting correct position for edge cases like: limit 2, counter 4, should be 0
+    my $pos = int(($self->{counter} - ($self->limit + 1)) / $self->limit);
 
     $self->{queue}[$pos] //= {future => Future->new, counter=> 0};
 
@@ -82,12 +81,11 @@ sub _start_timer {
             $self->_start_timer;
 
             my $current = shift @{$self->{queue}};
-
-            $self->{counter} = $current->{count};
+            $self->{counter} = $current->{counter};
             $current->{future}->done;
         });
 
-    return;
+    return $self->{timer};
 }
 
 1;
