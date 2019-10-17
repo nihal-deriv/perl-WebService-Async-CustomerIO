@@ -49,7 +49,7 @@ subtest 'Get current queue' => sub {
     for my $test_case (@tests) {
         my ($data, $result) = @{$test_case};
         my $limiter = WebService::Async::CustomerIO::RateLimiter->new(
-            limit => $data->{limit}, 
+            limit => $data->{limit},
             interval => 1
         );
 

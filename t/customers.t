@@ -111,7 +111,7 @@ subtest 'Api Methods tests' => sub {
         is $response->{uri}, 'customers/some_id/devices', 'URI is correct';
         is_deeply $response->{data}, {device => {id =>'some_device_id', platform => 'ios', last_used => $time}}, 'Data is correct';
 
-        my $response = $customer->upsert_device(
+        $response = $customer->upsert_device(
             device_id => 'some_device_id',
             platform  => 'android',
             last_used => $time,
