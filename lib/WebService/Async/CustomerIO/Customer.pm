@@ -33,7 +33,7 @@ parameters:
 sub new {
     my ($cls, %param) = @_;
 
-    $param{$_} or Carp::croak "Missing requered argument $_" for (qw(id api_client));
+    $param{$_} or Carp::croak "Missing required argument: $_" for (qw(id api_client));
 
     my $self = +{map { $_ => $param{$_} } qw(id email created_at attributes api_client)};
 
@@ -158,7 +158,7 @@ Parameters:
 sub upsert_device {
     my ($self, %param) = @_;
 
-    $param{$_} or Carp::croak "Missing required argument $_" for (qw(device_id platform));
+    $param{$_} or Carp::croak "Missing required argument: $_" for (qw(device_id platform));
 
     Carp::croak 'Invalid value for platform: ' . $param{platform}
         if $param{platform} !~ /^(?:ios|android)$/;
@@ -181,7 +181,7 @@ Delete a customer device
 sub delete_device {
     my ($self, $device_id) = @_;
 
-    $device_id or Carp::croak "Missing requered argument device_id";
+    $device_id or Carp::croak "Missing required argument: device_id";
 
     return $self->api->tracking_request(DELETE => $self->_get_uri('devices', $device_id));
 }
@@ -201,7 +201,7 @@ Parameters:
 sub emit_event {
     my ($self, %param) = @_;
 
-    Carp::croak 'Missing requered argument name' unless $param{name};
+    Carp::croak 'Missing required argument: name' unless $param{name};
 
     return $self->api->tracking_request(POST => $self->_get_uri('events'), \%param);
 }
