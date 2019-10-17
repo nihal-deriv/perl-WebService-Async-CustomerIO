@@ -44,7 +44,7 @@ subtest 'Getters methods' => sub {
     is_deeply $customer->attributes, {some=>'data'}, 'Get attributes';
 };
 
-subtest 'Adding users to segment' => sub {
+subtest 'Api Methods tests' => sub {
     my $time = time;
     my $api = WebService::Async::CustomerIO->new(
         site_id => 'some_site_id',
