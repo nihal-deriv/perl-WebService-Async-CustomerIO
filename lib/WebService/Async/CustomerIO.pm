@@ -86,7 +86,7 @@ Gettert returns RateLimmiter for regular api endpoint.
 
 =cut
 
-sub api_ratelimiter {shift->{api_ratelimitter}}
+sub api_ratelimiter {shift->{api_ratelimiter}}
 
 =head2 tracking_ratelimiter
 
@@ -157,7 +157,7 @@ sub _request {
             my $response_data = decode_json_utf8($response->content);
             return Future->done($response_data);
         } catch {
-            return Future->fail('UNEXPECTED_RESPONSE_FORMAT', @_);
+            return Future->fail('UNEXPECTED_RESPONSE_FORMAT', $@);
         }
     });
 }
@@ -239,7 +239,10 @@ Add people to a manual segment.
 sub add_to_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
-    return $self->tracking_request(POST => 'segments/$segment_id/add_customers', {ids => $customers_ids});
+    Carp::croak 'Missing requered attribute: segment_id' unless $segment_id;
+    Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
+
+    return $self->tracking_request(POST => "segments/$segment_id/add_customers", {ids => $customers_ids});
 }
 
 =head2 remove_from_segment($segment_id, @$customer_ids) -> Future()
@@ -251,7 +254,10 @@ Remove people from a manual segment.
 sub remove_from_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
-    return $self->tracking_request(POST => 'segments/$segment_id/remove_customers', {ids => $customers_ids});
+    Carp::croak 'Missing requered attribute: segment_id' unless $segment_id;
+    Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
+
+    return $self->tracking_request(POST => "segments/$segment_id/remove_customers", {ids => $customers_ids});
 }
 
 
