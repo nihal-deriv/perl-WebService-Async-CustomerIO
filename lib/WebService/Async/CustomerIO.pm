@@ -94,6 +94,53 @@ sub site_id {shift->{site_id}}
 
 sub api_key {shift->{api_key}}
 
+=head2 API endpoints:
+
+There is 2 stable API for Customer.io, if you need to add a new method check 
+the L<documentation for API|https://customer.io/docs/api/> which endpoint 
+you need to use:
+
+=over 4
+
+=item * C<Tracking API> - Behavioral Tracking API is used to identify and track
+customer data with Customer.io.
+
+=item * C<Regular API> - Currently, this endpoint is only used for sending
+L<API triggered broadcasts|https://customer.io/docs/api-triggered-broadcast-setup>.
+
+=back
+
+=head2 tracking_request
+
+Sending request to Tracking API end point.
+
+Usage: C<< tracking_request($method, $uri, $data) -> future($data) >>
+
+=cut
+
+sub tracking_request {
+    my ($self, $method, $uri, $data) = @_;
+    return $self->tracking_ratelimiter->acquire->then(sub {
+        $self->_request($method, join(q{/} => (TRACKING_END_POINT, $uri)), $data);
+    });
+}
+
+=head2 api_request
+
+Sending request to Regular API end point.
+
+Usage: C<< api_request($method, $uri, $data) -> future($data) >>
+
+=cut
+
+sub api_request {
+    my ($self, $method, $uri, $data) = @_;
+
+    return $self->api_ratelimiter->acquire->then(sub {
+        $self->_request($method, join(q{/} => (API_END_POINT, $uri)), $data);
+    });
+}
+
 =head2 api_ratelimiter
 
 Getter returns RateLimmiter for regular API endpoint.
@@ -109,37 +156,6 @@ Getter returns RateLimmiter for tracking API endpoint.
 =cut
 
 sub tracking_ratelimiter {shift->{tracking_ratelimiter}}
-
-=head2 tracking_request
-
-Sending request to tracking API end point.
-
-Usage: C<< tracking_request($method, $uri, $data) -> future($data) >>
-
-=cut
-
-sub tracking_request {
-    my ($self, $method, $uri, $data) = @_;
-    return $self->tracking_ratelimiter->acquire->then(sub {
-        $self->_request($method, join(q{/} => (TRACKING_END_POINT, $uri)), $data);
-    });
-}
-
-=head2 api_request
-
-Sending request to regular API end point.
-
-Usage: C<< api_request($method, $uri, $data) -> future($data) >>
-
-=cut
-
-sub api_request {
-    my ($self, $method, $uri, $data) = @_;
-
-    return $self->api_ratelimiter->acquire->then(sub {
-        $self->_request($method, join(q{/} => (API_END_POINT, $uri)), $data);
-    });
-}
 
 sub _request {
     my ($self, $method, $uri, $data) = @_;
