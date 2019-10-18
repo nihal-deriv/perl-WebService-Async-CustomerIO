@@ -29,10 +29,10 @@ use WebService::Async::CustomerIO::RateLimiter;
 use WebService::Async::CustomerIO::Trigger;
 
 use constant {
-    TRACKING_END_POINT => 'https://track.customer.io/api/v1',
-    API_END_POINT      => 'https://api.customer.io/v1/api',
-    RPS_LIMIT_TRACKING => 30,
-    RPS_LIMIT_API      => 10,
+    TRACKING_END_POINT                => 'https://track.customer.io/api/v1',
+    API_END_POINT                     => 'https://api.customer.io/v1/api',
+    REQUEST_PER_SECOND_LIMIT_TRACKING => 30,
+    REQUEST_PER_SECOND_LIMIT_API      => 10,
 };
 
 =head2 new
@@ -62,7 +62,7 @@ sub configure {
 
     $self->{tracking_ratelimiter} ||= do {
         my $rl =WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => RPS_LIMIT_TRACKING,
+            limit    => REQUEST_PER_SECOND_LIMIT_TRACKING,
             interval => 1,
         );
         $self->add_child($rl);
@@ -71,7 +71,7 @@ sub configure {
     };
     $self->{api_ratelimiter} ||= do {
         my $rl = WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => RPS_LIMIT_API,
+            limit    => REQUEST_PER_SECOND_LIMIT_API,
             interval => 1,
         );
         $self->add_child($rl);
