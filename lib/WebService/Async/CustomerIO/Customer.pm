@@ -159,11 +159,11 @@ sub unsuppress {
 }
 
 
-=head2 upsert_devide
+=head2 upsert_device
 
 Create or update a customer device
 
-Usage: C<< upsert_devide(%params) -> Future() >>
+Usage: C<< upsert_device(%params) -> Future() >>
 
 Parameters:
 
@@ -200,7 +200,7 @@ sub upsert_device {
 
 Delete a customer device
 
-Usage: C<< delete_devide($id) -> Future() >>
+Usage: C<< delete_device($id) -> Future() >>
 
 =cut
 
