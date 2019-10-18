@@ -35,11 +35,7 @@ sub new {
 
     $param{$_} or Carp::croak "Missing required argument: $_" for (qw(id api_client));
 
-    my $self = +{map { $_ => $param{$_} } qw(id email created_at attributes api_client)};
-
-    bless $self, $cls;
-
-    return $self;
+    return bless \%param, $cls;
 }
 
 =head2 api
