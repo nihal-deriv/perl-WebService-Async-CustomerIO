@@ -157,6 +157,13 @@ Getter returns RateLimmiter for tracking API endpoint.
 
 sub tracking_ratelimiter {shift->{tracking_ratelimiter}}
 
+my %PATTERN_FOR_ERROR = (
+    RESOURCE_NOT_FOUND  => qr/^404$/,
+    INVALID_REQUEST     => qr/^400$/,
+    INVALID_API_KEY     => qr/^401$/,
+    INTERNAL_SERVER_ERR => qr/^50[0234]$/,
+);
+
 sub _request {
     my ($self, $method, $uri, $data) = @_;
 
@@ -180,10 +187,10 @@ sub _request {
         my $code = $response->code;
         my $request_data = {method => $method, uri => $uri, data => $data};
 
-        return Future->fail('RESOURCE_NOT_FOUND', 'customerio', $request_data)  if $code == 404;
-        return Future->fail('INVALID_REQUEST', 'customerio', $request_data)     if $code == 400;
-        return Future->fail('INVALID_API_KEY', 'customerio', $request_data)     if $code == 401;
-        return Future->fail('INTERNAL_SERVER_ERR', 'customerio', $request_data) if $code =~/^50[0234]$/;
+        for my $error_code (keys %PATTERN_FOR_ERROR) {
+            next unless $code =~ /$PATTERN_FOR_ERROR{$error_code}/;
+            return Future->fail($error_code, 'customerio', $request_data);
+        }
 
         return Future->fail('UNEXPECTED_HTTP_CODE: ' . $code_msg, 'customerio', $response);
     })->then(sub {
