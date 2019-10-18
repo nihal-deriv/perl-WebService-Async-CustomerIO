@@ -200,7 +200,7 @@ sub upsert_device {
 
 Delete a customer device
 
-Usage: C<< delete_devide($id) -> Future() >>
+Usage: C<< delete_device($id) -> Future() >>
 
 =cut
 
