@@ -196,7 +196,7 @@ sub upsert_device {
     return $self->api->tracking_request(PUT => $self->_get_uri('devices'), {device => $device});
 }
 
-=head2 delete_devide
+=head2 delete_device
 
 Delete a customer device
 
