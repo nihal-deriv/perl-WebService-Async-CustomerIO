@@ -25,10 +25,18 @@ Creates customer object. This method just creates an object, to sent this data t
 Usage: C<< new(%params) -> obj >>
 
 parameters:
-- id: the unique identifier for the customer.
-- email: optional. the email address of the user.
-- created_at: optional. the unix timestamp from when the user was created in your system
-- attributes: hashref which contains custom attributes to define the customer.
+
+=over 4
+
+=item * C<id> - the unique identifier for the customer.
+
+=item * C<email> - optional. the email address of the user.
+
+=item * C<created_at> - optional. the unix timestamp from when the user was created in your system
+
+=item * C<attributes> - hashref which contains custom attributes to define the customer.
+
+=back
 
 =cut
 
@@ -159,9 +167,15 @@ Usage: C<< upsert_devide(%params) -> Future() >>
 
 Parameters:
 
-- id: The unique token for the user device.
-- platform: The platform for the user device. Allowed values are 'ios' and 'android'.
-- last_used: Optional. UNIX timestamp representing the last used time for the device. If this is not included we default to the time of the device identify.
+=over 4
+
+=item * C<id> - The unique token for the user device.
+
+=item * C<platform> - The platform for the user device. Allowed values are 'ios' and 'android'.
+
+=item * C<last_used> - Optional. UNIX timestamp representing the last used time for the device. If this is not included we default to the time of the device identify.
+
+=back
 
 =cut
 

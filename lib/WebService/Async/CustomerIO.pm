@@ -42,8 +42,14 @@ Creates a new api client object
 Usage: C<< new(%params) -> obj >>
 
 Parameters:
-- site_id
-- api_key
+
+=over 4
+
+=item * C<site_id>
+
+=item * C<api_key>
+
+=back
 
 =cut
 
