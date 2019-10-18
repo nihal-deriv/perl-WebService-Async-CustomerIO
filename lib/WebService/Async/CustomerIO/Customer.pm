@@ -159,7 +159,7 @@ sub unsuppress {
 }
 
 
-=head2 upsert_devide
+=head2 upsert_device
 
 Create or update a customer device
 
