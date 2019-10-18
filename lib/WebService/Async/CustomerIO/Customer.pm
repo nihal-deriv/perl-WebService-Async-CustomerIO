@@ -163,7 +163,7 @@ sub unsuppress {
 
 Create or update a customer device
 
-Usage: C<< upsert_devide(%params) -> Future() >>
+Usage: C<< upsert_device(%params) -> Future() >>
 
 Parameters:
 
