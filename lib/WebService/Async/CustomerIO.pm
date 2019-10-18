@@ -132,8 +132,9 @@ sub api_request {
 sub _request {
     my ($self, $method, $uri, $data) = @_;
 
-    my $body = encode_json_utf8($data) if $data;
-    $body //= '' if $method eq 'POST';
+    my $body = $data             ? encode_json_utf8($data)
+             : $method eq 'POST' ? q{}
+             :                     undef;
 
     return $self->_ua->do_request(
             method  => $method,
