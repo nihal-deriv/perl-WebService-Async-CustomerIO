@@ -12,7 +12,7 @@ use WebService::Async::CustomerIO::RateLimiter;
 
 subtest 'Creating limiter' => sub {
     my @tests = (
-        [{interval => 1}, qr/^Missing requeread argument: limit/],
+        [{interval => 1}, qr/^Missing required argument: limit/],
         [{limit => 1}, qr/^Missing requeread argument: interval/],
         [{limit => 1, interval => 0}, qr/^Invalid value for interval/],
         [{limit => 1, interval => -1}, qr/^Invalid value for interval/],
