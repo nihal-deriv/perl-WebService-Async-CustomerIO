@@ -152,19 +152,19 @@ sub _request {
         my $code = $response->code;
         my $request_data = {method => $method, uri => $uri, data => $data};
 
-        return Future->fail('RESOURCE_NOT_FOUND', $request_data)  if $code == 404;
-        return Future->fail('INVALID_REQUEST', $request_data)     if $code == 400;
-        return Future->fail('INVALID_API_KEY', $request_data)     if $code == 401;
-        return Future->fail('INTERNAL_SERVER_ERR', $request_data) if $code =~/^50[0234]$/;
+        return Future->fail('RESOURCE_NOT_FOUND', 'customerio', $request_data)  if $code == 404;
+        return Future->fail('INVALID_REQUEST', 'customerio', $request_data)     if $code == 400;
+        return Future->fail('INVALID_API_KEY', 'customerio', $request_data)     if $code == 401;
+        return Future->fail('INTERNAL_SERVER_ERR', 'customerio', $request_data) if $code =~/^50[0234]$/;
 
-        return Future->fail('UNEXPECTED_HTTP_CODE: ' . $code_msg, @_);
+        return Future->fail('UNEXPECTED_HTTP_CODE: ' . $code_msg, 'customerio', $response);
     })->then(sub {
         my ($response) = @_;
         try {
             my $response_data = decode_json_utf8($response->content);
             return Future->done($response_data);
         } catch {
-            return Future->fail('UNEXPECTED_RESPONSE_FORMAT', $@);
+            return Future->fail('UNEXPECTED_RESPONSE_FORMAT', 'customerio', $@, $response);
         }
     });
 }

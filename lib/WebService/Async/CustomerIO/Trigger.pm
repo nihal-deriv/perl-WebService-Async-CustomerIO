@@ -68,7 +68,7 @@ sub activate {
                 ->then(sub{
                     my ($response) = @_;
 
-                    return Future->fail("UNEXPECTED_RESPONSE_FORMAT", $response)
+                    return Future->fail("UNEXPECTED_RESPONSE_FORMAT", 'customerio', $response)
                         if !defined $response->{id};
 
                     $self->{id} = $response->{id};
