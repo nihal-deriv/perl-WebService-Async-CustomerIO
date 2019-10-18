@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use Test::MockObject::Extends;
 
 use IO::Async::Loop;
@@ -21,9 +21,8 @@ subtest 'Creating limiter' => sub {
     );
 
     for my $test_case (@tests) {
-        throws_ok {
-            WebService::Async::CustomerIO::RateLimiter->new(%{$test_case->[0]})
-        } $test_case->[1], "Got Expected error";
+        my $err = exception {WebService::Async::CustomerIO::RateLimiter->new(%{$test_case->[0]})};
+        like $err, $test_case->[1], "Got Expected error";
     }
 
     ok(WebService::Async::CustomerIO::RateLimiter->new(limit => 1, interval => 1), 'RateLimiter created');

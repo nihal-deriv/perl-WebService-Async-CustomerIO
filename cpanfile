@@ -13,7 +13,7 @@ on configure => sub {
 };
 
 on test => sub {
-    requires 'Test::Exception', 0;
+    requires 'Test::Fatal', 0;
     requires 'Test::MockObject', 0;
     requires 'Test::MockObject::Extends', 0;
 }

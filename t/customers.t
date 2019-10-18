@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use Test::MockObject;
 use Test::MockObject::Extends;
 
@@ -19,9 +19,8 @@ subtest 'Creating API client' => sub {
     );
 
     for my $test_case (@tests) {
-        throws_ok {
-            WebService::Async::CustomerIO::Customer->new(%{$test_case->[0]})
-        } $test_case->[1], "Got Expected error";
+        my $err = exception {WebService::Async::CustomerIO::Customer->new(%{$test_case->[0]})};
+        like $err, $test_case->[1], "Got Expected error";
     }
 
     ok(WebService::Async::CustomerIO::Customer->new( id => 1, api_client => 1), 'Api Client created');
@@ -120,10 +119,12 @@ subtest 'Api Methods tests' => sub {
         is $response->{method}, 'PUT', 'Method is correct';
         is $response->{uri}, 'customers/some_id/devices', 'URI is correct';
         is_deeply $response->{data}, {device => {id =>'some_device_id', platform => 'android', last_used => $time}}, 'Data is correct';
-
-        throws_ok { $customer->upsert_device(platform => 'ios')} qr/^Missing required argument: device_id/, "Got error for missing device_id";
-        throws_ok { $customer->upsert_device(device_id => 'some_id')} qr/^Missing required argument: platform/, "Got error for missing platform";
-        throws_ok { $customer->upsert_device(device_id => 'some_id', platform => 'win')} qr/^Invalid value for platform: win/, "Got error for invalid platform";
+        my $err = exception { $customer->upsert_device(platform => 'ios') };
+        like $err, qr/^Missing required argument: device_id/, "Got error for missing device_id";
+        $err = exception { $customer->upsert_device(device_id => 'some_id') };
+        like $err, qr/^Missing required argument: platform/, "Got error for missing platform";
+        $err = exception { $customer->upsert_device(device_id => 'some_id', platform => 'win') };
+        like $err, qr/^Invalid value for platform: win/, "Got error for invalid platform";
     };
 
     subtest 'delete_device' => sub {
@@ -131,8 +132,8 @@ subtest 'Api Methods tests' => sub {
         is $response->{method}, 'DELETE', 'Method is correct';
         is $response->{uri}, 'customers/some_id/devices/some_device_id', 'URI is correct';
         is_deeply $response->{data}, undef, 'Data is correct';
-
-        throws_ok { $customer->delete_device } qr/^Missing required argument: device_id/, "Got error for missing device_id";
+        my $err = exception { $customer->delete_device };
+        like $err, qr/^Missing required argument: device_id/, "Got error for missing device_id";
     };
 
     subtest 'emit_event' => sub {
@@ -140,8 +141,8 @@ subtest 'Api Methods tests' => sub {
         is $response->{method}, 'POST', 'Method is correct';
         is $response->{uri}, 'customers/some_id/events', 'URI is correct';
         is_deeply $response->{data}, {name => 'some_event', some => 'data'}, 'Data is correct';
-
-        throws_ok { $customer->emit_event } qr/^Missing required argument: name/, "Got error for missing device_id";
+        my $err = exception { $customer->emit_event };
+        like $err, qr/^Missing required argument: name/, "Got error for missing device_id";
     };
 };
 

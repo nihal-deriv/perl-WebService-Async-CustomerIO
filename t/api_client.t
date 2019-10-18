@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use Test::MockObject;
 use Test::MockObject::Extends;
 
@@ -18,9 +18,8 @@ subtest 'Creating API client' => sub {
     );
 
     for my $test_case (@tests) {
-        throws_ok {
-            WebService::Async::CustomerIO->new(%{$test_case->[0]})
-        } $test_case->[1], "Got Expected error";
+        my $err = exception {WebService::Async::CustomerIO->new(%{$test_case->[0]})};
+        like $err, $test_case->[1], "Got Expected error";
     }
 
     ok(WebService::Async::CustomerIO->new(site_id => 1, api_key => 1), 'Api Client created');
@@ -186,8 +185,10 @@ subtest 'Adding users to segment' => sub {
     is $response->{uri}, 'segments/1/add_customers', 'URI is correct';
     is_deeply $response->{data}, {ids => [1]}, 'Data is correct';
 
-    throws_ok { $api->add_to_segment(undef, [1])->get} qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
-    throws_ok { $api->add_to_segment(1)->get} qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
+    my $err = exception { $api->add_to_segment(undef, [1])->get };
+    like $err, qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
+    $err = exception { $api->add_to_segment(1)->get };
+    like $err, qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
 };
 
 subtest 'Removing users from segment' => sub {
@@ -208,9 +209,10 @@ subtest 'Removing users from segment' => sub {
     is $response->{method}, 'POST', 'Method is correct';
     is $response->{uri}, 'segments/1/remove_customers', 'URI is correct';
     is_deeply $response->{data}, {ids => [1]}, 'Data is correct';
-
-    throws_ok { $api->remove_from_segment(undef, [1])->get} qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
-    throws_ok { $api->remove_from_segment(1)->get} qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
+    my $err = exception { $api->remove_from_segment(undef, [1])->get };
+    like $err, qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
+    $err = exception { $api->remove_from_segment(1)->get };
+    like $err, qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
 };
 
 

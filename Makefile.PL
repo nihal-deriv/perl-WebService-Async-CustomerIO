@@ -29,7 +29,7 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0,
     "Test::More" => "0.94",
-    "Test::Exception" => 0,
+    "Test::Fatal" => 0,
     "Test::MockObject" => 0,
     "Test::MockObject::Extends" => 0,
   },
@@ -47,7 +47,7 @@ my %FallbackPrereqs = (
   "Net::Async::HTTP" => 0,
   "Syntax::Keyword::Try" => 0,
   "Future" => 0
-  "Test::Exception" => 0,
+  "Test::Fatal" => 0,
   "Test::MockObject" => 0,
   "Test::MockObject::Extends" => 0,
 );

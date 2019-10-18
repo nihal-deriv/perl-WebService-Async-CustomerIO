@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use Test::MockObject;
 use Test::MockObject::Extends;
 
@@ -19,9 +19,8 @@ subtest 'Creating API client' => sub {
     );
 
     for my $test_case (@tests) {
-        throws_ok {
-            WebService::Async::CustomerIO::Trigger->new(%{$test_case->[0]})
-        } $test_case->[1], "Got Expected error";
+        my $err = exception {WebService::Async::CustomerIO::Trigger->new(%{$test_case->[0]})};
+        like $err, $test_case->[1], "Got Expected error";
     }
 
     ok(WebService::Async::CustomerIO::Trigger->new( campaign_id => 1, api_client => 1), 'Trigger created');
