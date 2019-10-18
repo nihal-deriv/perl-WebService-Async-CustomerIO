@@ -9,7 +9,7 @@ use Future;
 use parent qw(IO::Async::Notifier);
 
 =head1 NAME
-WebService::Async::CustomerIO::RateLimitter - This class provide possobility to limit amount
+WebService::Async::CustomerIO::RateLimitter - This class provide possibility to limit amount
 of request in time interval
 
 =head1 SYNOPSIS
@@ -41,8 +41,8 @@ sub interval {shift->{interval}}
 sub limit {shift->{limit}}
 
 =head2 acquire
-Method checks avaliblity for free slot.
-It returns future, when slot will be avalible, then fututre will be resolved.
+Method checks availability for free slot.
+It returns future, when slot will be available, then future will be resolved.
 =cut
 sub acquire {
     my ($self) = @_;

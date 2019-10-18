@@ -20,7 +20,7 @@ use Carp qw();
 
 =head2 new(%params) -> obj
 
-creates customer object. this method just creates an object, to sent this data to api, after creation should be called upsert method.
+Creates customer object. This method just creates an object, to sent this data to api, after creation should be called upsert method.
 
 parameters:
 - id: the unique identifier for the customer.

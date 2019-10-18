@@ -82,7 +82,7 @@ sub api_key {shift->{api_key}}
 
 =head2 api_ratelimiter
 
-Gettert returns RateLimmiter for regular api endpoint.
+Getter returns RateLimmiter for regular API endpoint.
 
 =cut
 
@@ -90,7 +90,7 @@ sub api_ratelimiter {shift->{api_ratelimiter}}
 
 =head2 tracking_ratelimiter
 
-Gettert returns RateLimmiter for tracking api endpoint.
+Getter returns RateLimmiter for tracking API endpoint.
 
 =cut
 
@@ -208,7 +208,7 @@ sub new_trigger {
 
 =head2 find_trigger($campaing_idm, $trigger_id) -> obj
 
-Retriving trigger object from API
+Retrieving trigger object from API
 
 =cut
 
@@ -239,7 +239,7 @@ Add people to a manual segment.
 sub add_to_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
-    Carp::croak 'Missing requered attribute: segment_id' unless $segment_id;
+    Carp::croak 'Missing required attribute: segment_id' unless $segment_id;
     Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
 
     return $self->tracking_request(POST => "segments/$segment_id/add_customers", {ids => $customers_ids});
@@ -254,7 +254,7 @@ Remove people from a manual segment.
 sub remove_from_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
-    Carp::croak 'Missing requered attribute: segment_id' unless $segment_id;
+    Carp::croak 'Missing required attribute: segment_id' unless $segment_id;
     Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
 
     return $self->tracking_request(POST => "segments/$segment_id/remove_customers", {ids => $customers_ids});

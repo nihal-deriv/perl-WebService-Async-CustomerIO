@@ -186,7 +186,7 @@ subtest 'Adding users to segment' => sub {
     is $response->{uri}, 'segments/1/add_customers', 'URI is correct';
     is_deeply $response->{data}, {ids => [1]}, 'Data is correct';
 
-    throws_ok { $api->add_to_segment(undef, [1])->get} qr/^Missing requered attribute: segment_id/, "Got error for missing segment id";
+    throws_ok { $api->add_to_segment(undef, [1])->get} qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
     throws_ok { $api->add_to_segment(1)->get} qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
 };
 
@@ -209,7 +209,7 @@ subtest 'Removing users from segment' => sub {
     is $response->{uri}, 'segments/1/remove_customers', 'URI is correct';
     is_deeply $response->{data}, {ids => [1]}, 'Data is correct';
 
-    throws_ok { $api->remove_from_segment(undef, [1])->get} qr/^Missing requered attribute: segment_id/, "Got error for missing segment id";
+    throws_ok { $api->remove_from_segment(undef, [1])->get} qr/^Missing required attribute: segment_id/, "Got error for missing segment id";
     throws_ok { $api->remove_from_segment(1)->get} qr/^Invalid value for customers_ids/, "Got error for missing customer ids";
 };
 
