@@ -15,9 +15,11 @@ WebService::Async::CustomerIO::Trigger - Class for working with triggers end poi
 
 use Carp qw();
 
-=head2 new(%params) -> obj
+=head2 new
 
 Creates a new api client object
+
+Usage: C<< new(%params) -> obj >>
 
 Parameters:
 - campaign_id
@@ -51,9 +53,11 @@ sub id {shift->{id}}
 
 sub campaign_id {shift->{campaign_id}}
 
-=head2 activate(%param) -> Future($obj)
+=head2 activate
 
 Trigger broadcast campaign
+
+Usage: C<< activate(%param) -> Future($obj) >>
 
 =cut
 
@@ -78,9 +82,11 @@ sub activate {
 }
 
 
-=head2 find($api_client, $campaign_id, $trigger_id) -> Future($obj)
+=head2 find
 
 Retrieve status of a broadcast
+
+Usage: C<<  find($api_client, $campaign_id, $trigger_id) -> Future($obj) >>
 
 =cut
 
@@ -95,9 +101,11 @@ sub find {
                });
 }
 
-=head2 get_errors($start, $limit) -> Future(%$result)
+=head2 get_errors
 
 Retrieve per-user data file processing errors.
+
+Usage: C<< get_errors($start, $limit) -> Future(%$result) >>
 
 =cut
 

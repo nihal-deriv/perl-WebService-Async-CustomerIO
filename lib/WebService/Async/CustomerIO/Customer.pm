@@ -18,9 +18,11 @@ WebService::Async::CustomerIO::Customer - Class for working with customer.
 use Carp qw();
 
 
-=head2 new(%params) -> obj
+=head2 new
 
 Creates customer object. This method just creates an object, to sent this data to api, after creation should be called upsert method.
+
+Usage: C<< new(%params) -> obj >>
 
 parameters:
 - id: the unique identifier for the customer.
@@ -68,9 +70,11 @@ sub created_at {shift->{created_at}}
 
 sub attributes {shift->{attributes}}
 
-=head2 upsert() -> Future()
+=head2 upsert
 
 Create or update a customer
+
+Usage: C<< upsert() -> Future() >>
 
 =cut
 
@@ -89,9 +93,11 @@ sub upsert {
     return $self->api->tracking_request(PUT => $self->_get_uri, \%user_params);
 }
 
-=head2 set_attribute($name, $value) -> Future()
+=head2 set_attribute
 
 Set a customer attribute
+
+Usage: C<< set_attribute($name, $value) -> Future() >>
 
 =cut
 
@@ -102,9 +108,11 @@ sub set_attribute {
 }
 
 
-=head2 remove_attribute($name, $value) -> Future()
+=head2 remove_attribute
 
 Remove customer attribute
+
+Usage: C<< remove_attribute($name, $value) -> Future() >>
 
 =cut
 
@@ -114,9 +122,11 @@ sub remove_attribute {
     return $self->set_attribute($name, '')
 }
 
-=head2 supperss() -> Future()
+=head2 supperss
 
 Suppress the customer. All events related to this customer wil be ignored by API.
+
+Usage: C<< supperss() -> Future() >>
 
 =cut
 
@@ -126,9 +136,11 @@ sub suppress {
     return $self->api->tracking_request(POST => $self->_get_uri('suppress'));
 }
 
-=head2 unsupperss() -> Future()
+=head2 unsupperss
 
 Unsuppress the customer.
+
+Usage: C<< unsupperss() -> Future() >>
 
 =cut
 
@@ -139,9 +151,11 @@ sub unsuppress {
 }
 
 
-=head2 upsert_devide(%params) -> Future()
+=head2 upsert_devide
 
 Create or update a customer device
+
+Usage: C<< upsert_devide(%params) -> Future() >>
 
 Parameters:
 
@@ -168,9 +182,11 @@ sub upsert_device {
     return $self->api->tracking_request(PUT => $self->_get_uri('devices'), {device => $device});
 }
 
-=head2 delete_devide($id) -> Future()
+=head2 delete_devide
 
 Delete a customer device
+
+Usage: C<< delete_devide($id) -> Future() >>
 
 =cut
 
@@ -182,9 +198,11 @@ sub delete_device {
     return $self->api->tracking_request(DELETE => $self->_get_uri('devices', $device_id));
 }
 
-=head2 emit_event(%params) -> Future()
+=head2 emit_event
 
 Track a customer event
+
+Usage: C<< emit_event(%params) -> Future() >>
 
 Parameters:
 

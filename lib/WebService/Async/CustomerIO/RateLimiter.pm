@@ -42,8 +42,10 @@ sub interval {shift->{interval}}
 sub limit {shift->{limit}}
 
 =head2 acquire
+
 Method checks availability for free slot.
 It returns future, when slot will be available, then future will be resolved.
+
 =cut
 sub acquire {
     my ($self) = @_;

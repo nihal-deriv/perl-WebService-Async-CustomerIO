@@ -35,9 +35,11 @@ use constant {
     RPS_LIMIT_API      => 10,
 };
 
-=head2 new(%params) -> obj
+=head2 new
 
 Creates a new api client object
+
+Usage: C<< new(%params) -> obj >>
 
 Parameters:
 - site_id
@@ -102,9 +104,11 @@ Getter returns RateLimmiter for tracking API endpoint.
 
 sub tracking_ratelimiter {shift->{tracking_ratelimiter}}
 
-=head2 tracking_request($method, $uri, $data) -> future($data)
+=head2 tracking_request
 
 Sending request to tracking API end point.
+
+Usage: C<< tracking_request($method, $uri, $data) -> future($data) >>
 
 =cut
 
@@ -115,9 +119,11 @@ sub tracking_request {
     });
 }
 
-=head2 api_request($method, $uri, $data) -> future($data)
+=head2 api_request
 
 Sending request to regular API end point.
+
+Usage: C<< api_request($method, $uri, $data) -> future($data) >>
 
 =cut
 
@@ -189,9 +195,11 @@ sub _ua {
     return $self->{ua};
 }
 
-=head2 new_customer(%params) -> obj
+=head2 new_customer
 
 Creating new customer object
+
+Usage: C<< new_customer(%params) -> obj >>
 
 =cut
 
@@ -201,9 +209,11 @@ sub new_customer {
     return WebService::Async::CustomerIO::Customer->new(%param, api_client => $self);
 }
 
-=head2 new_trigger(%params) -> obj
+=head2 new_trigger
 
 Creating new trigger object
+
+Usage: C<< new_trigger(%params) -> obj >>
 
 =cut
 
@@ -213,9 +223,11 @@ sub new_trigger {
     return WebService::Async::CustomerIO::Trigger->new(%param, api_client => $self);
 }
 
-=head2 find_trigger($campaing_idm, $trigger_id) -> obj
+=head2 find_trigger
 
 Retrieving trigger object from API
+
+Usage: C<< find_trigger($campaing_idm, $trigger_id) -> obj >>
 
 =cut
 
@@ -225,9 +237,11 @@ sub find_trigger {
     return WebService::Async::CustomerIO::Trigger->find($self, $campaing_id, $trigger_id);
 }
 
-=head2 new_customer(%params) -> obj
+=head2 new_customer
 
 Creating new customer object
+
+Usage: C<< new_customer(%params) -> obj >>
 
 =cut
 
@@ -237,9 +251,11 @@ sub emit_event {
     return $self->tracking_request(POST => 'events', \%params);
 }
 
-=head2 add_to_segment($segment_id, @$customer_ids) -> Future()
+=head2 add_to_segment
 
 Add people to a manual segment.
+
+Usage: C<< add_to_segment($segment_id, @$customer_ids) -> Future() >>
 
 =cut
 
@@ -252,9 +268,11 @@ sub add_to_segment {
     return $self->tracking_request(POST => "segments/$segment_id/add_customers", {ids => $customers_ids});
 }
 
-=head2 remove_from_segment($segment_id, @$customer_ids) -> Future()
+=head2 remove_from_segment
 
 Remove people from a manual segment.
+
+Usage: C<< remove_from_segment($segment_id, @$customer_ids) -> Future() >>
 
 =cut
 
