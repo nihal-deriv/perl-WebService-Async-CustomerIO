@@ -13,8 +13,8 @@ use JSON::MaybeUTF8 qw(:v1);
 
 subtest 'Creating API client' => sub {
     my @tests = (
-        [{site_id => 1}, qr/^Missing requeread argument: api_key/],
-        [{api_key => 1}, qr/^Missing requeread argument: site_id/],
+        [{site_id => 1}, qr/^Missing required argument: api_key/],
+        [{api_key => 1}, qr/^Missing required argument: site_id/],
     );
 
     for my $test_case (@tests) {

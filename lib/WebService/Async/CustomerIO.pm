@@ -56,7 +56,7 @@ Parameters:
 sub configure {
     my ($self, %args) = @_;
     for my $k (qw(site_id api_key)) {
-        Carp::croak "Missing requeread argument: $k" unless exists $args{$k};
+        Carp::croak "Missing required argument: $k" unless exists $args{$k};
         $self->{$k} = delete $args{$k} if exists $args{$k};
     }
 
