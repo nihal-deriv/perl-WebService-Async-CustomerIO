@@ -17,6 +17,7 @@ WebService::Async::CustomerIO - unofficial support for the Customer.io service
 
 use parent qw(IO::Async::Notifier);
 
+use mro;
 use Syntax::Keyword::Try;
 use Future;
 use Net::Async::HTTP;
@@ -51,21 +52,26 @@ sub configure {
         $self->{$k} = delete $args{$k} if exists $args{$k};
     }
 
-    $self->{tracking_ratelimiter} =
-        WebService::Async::CustomerIO::RateLimiter->new(
+    $self->{tracking_ratelimiter} ||= do {
+        my $rl =WebService::Async::CustomerIO::RateLimiter->new(
             limit    => RPS_LIMIT_TRACKING,
             interval => 1,
         );
-    $self->add_child($self->{tracking_ratelimiter});
+        $self->add_child($rl);
 
-    $self->{api_ratelimiter} =
-        WebService::Async::CustomerIO::RateLimiter->new(
+        $rl;
+    };
+    $self->{api_ratelimiter} ||= do {
+        my $rl = WebService::Async::CustomerIO::RateLimiter->new(
             limit    => RPS_LIMIT_API,
             interval => 1,
         );
-    $self->add_child($self->{api_ratelimiter});
+        $self->add_child($rl);
 
-    $self->SUPER::configure(%args);
+        $rl;
+    };
+
+    $self->next::method(%args);
 }
 
 =head2 site_id

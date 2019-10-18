@@ -5,6 +5,7 @@ use warnings;
 
 use Carp qw();
 use Future;
+use mro;
 
 use parent qw(IO::Async::Notifier);
 
@@ -29,7 +30,7 @@ sub configure {
     $self->{queue} = [];
     $self->{counter} = 0;
 
-    $self->SUPER::configure(%args);
+    $self->next::method(%args);
 }
 
 =head2 interval
