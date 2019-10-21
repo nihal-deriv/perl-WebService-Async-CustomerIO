@@ -8,16 +8,16 @@ use ExtUtils::MakeMaker 6.48;
 
 
 my %WriteMakefileArgs = (
-  "ABSTRACT" => "Webservice to connect to Onfido API",
+  "ABSTRACT" => "Webservice to connect to Customer.io API",
   "AUTHOR" => "binary.com <BINARY\@cpan.org>",
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.64",
     "File::ShareDir::Install" => "0.06"
   },
-  "DISTNAME" => "WebService-Async-Onfido",
+  "DISTNAME" => "WebService-Async-CustomerIO",
   "LICENSE" => "perl",
   "MIN_PERL_VERSION" => "5.014000",
-  "NAME" => "WebService::Async::Onfido",
+  "NAME" => "WebService::Async::CustomerIO",
   "PREREQ_PM" => {
     "IO::Async::Loop" => 0,
     "IO::Async::Notifier" => 0,
