@@ -53,31 +53,23 @@ Parameters:
 
 =cut
 
-sub configure {
-    my ($self, %args) = @_;
+sub _init {
+    my ($self, $args) = @_;
+
     for my $k (qw(site_id api_key)) {
-        Carp::croak "Missing required argument: $k" unless exists $args{$k};
-        $self->{$k} = delete $args{$k} if exists $args{$k};
+        Carp::croak "Missing required argument: $k" unless exists $args->{$k};
+        $self->{$k} = delete $args->{$k} if exists $args->{$k};
     }
 
-    $self->{tracking_ratelimiter} ||= do {
-        my $rl =WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => REQUEST_PER_SECOND_LIMIT_TRACKING,
-            interval => 1,
-        );
-        $self->add_child($rl);
+    $self->next::method($args);
+}
 
-        $rl;
-    };
-    $self->{api_ratelimiter} ||= do {
-        my $rl = WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => REQUEST_PER_SECOND_LIMIT_API,
-            interval => 1,
-        );
-        $self->add_child($rl);
+sub configure {
+    my ($self, %args) = @_;
 
-        $rl;
-    };
+    for my $k (qw(site_id api_key)) {
+        $self->{$k} = delete $args{$k} if exists $args{$k};
+    }
 
     $self->next::method(%args);
 }
@@ -147,7 +139,23 @@ Getter returns RateLimmiter for regular API endpoint.
 
 =cut
 
-sub api_ratelimiter {shift->{api_ratelimiter}}
+sub api_ratelimiter {
+    my ($self) = @_;
+
+    return $self->{api_ratelimiter} if $self->{api_ratelimiter};
+
+    Carp::croak "Can't use rate limiter without a loop" unless $self->loop;
+
+    $self->{api_ratelimiter} =
+        WebService::Async::CustomerIO::RateLimiter->new(
+            limit    => REQUEST_PER_SECOND_LIMIT_API,
+            interval => 1,
+        );
+
+    $self->add_child($self->{api_ratelimiter});
+
+    return $self->{api_ratelimiter};
+}
 
 =head2 tracking_ratelimiter
 
@@ -155,7 +163,23 @@ Getter returns RateLimmiter for tracking API endpoint.
 
 =cut
 
-sub tracking_ratelimiter {shift->{tracking_ratelimiter}}
+sub tracking_ratelimiter {
+    my ($self) = @_;
+
+    return $self->{tracking_ratelimiter} if $self->{tracking_ratelimiter};
+
+    Carp::croak "Can't use rate limiter without a loop" unless $self->loop;
+
+    $self->{tracking_ratelimiter} =
+        WebService::Async::CustomerIO::RateLimiter->new(
+            limit    => REQUEST_PER_SECOND_LIMIT_TRACKING,
+            interval => 1,
+        );
+
+    $self->add_child($self->{tracking_ratelimiter});
+
+    return $self->{tracking_ratelimiter};
+}
 
 my %PATTERN_FOR_ERROR = (
     RESOURCE_NOT_FOUND  => qr/^404$/,
