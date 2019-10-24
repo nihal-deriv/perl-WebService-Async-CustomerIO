@@ -3,8 +3,6 @@ package WebService::Async::CustomerIO::Customer;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
-
 =head1 NAME
 
 WebService::Async::CustomerIO::Customer - Class for working with customer.
