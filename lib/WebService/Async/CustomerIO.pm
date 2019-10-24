@@ -285,9 +285,9 @@ Usage: C<< find_trigger($campaing_idm, $trigger_id) -> obj >>
 =cut
 
 sub find_trigger {
-    my ($self, $campaing_id, $trigger_id) = @_;
+    my ($self, $campaign_id, $trigger_id) = @_;
 
-    return WebService::Async::CustomerIO::Trigger->find($self, $campaing_id, $trigger_id);
+    return WebService::Async::CustomerIO::Trigger->find($self, $campaign_id, $trigger_id);
 }
 
 =head2 new_customer
