@@ -128,11 +128,11 @@ sub remove_attribute {
     return $self->set_attribute($name, '')
 }
 
-=head2 supperss
+=head2 suppress
 
 Suppress the customer. All events related to this customer wil be ignored by API.
 
-Usage: C<< supperss() -> Future() >>
+Usage: C<< suppress() -> Future() >>
 
 =cut
 
@@ -142,11 +142,11 @@ sub suppress {
     return $self->api->tracking_request(POST => $self->_get_uri('suppress'));
 }
 
-=head2 unsupperss
+=head2 unsuppress
 
 Unsuppress the customer.
 
-Usage: C<< unsupperss() -> Future() >>
+Usage: C<< unsuppress() -> Future() >>
 
 =cut
 
