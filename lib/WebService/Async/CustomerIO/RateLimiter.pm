@@ -64,7 +64,7 @@ sub _current_queue {
     # +1 for getting correct position for edge cases like: limit 2, counter 4, should be 0
     my $pos = int(($self->{counter} - ($self->limit + 1)) / $self->limit);
 
-    $self->{queue}[$pos] //= {future => Future->new, counter=> 0};
+    $self->{queue}[$pos] //= {future => $self->loop->new_future, counter=> 0};
 
     return $self->{queue}[$pos];
 }

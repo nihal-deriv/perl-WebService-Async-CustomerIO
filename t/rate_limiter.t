@@ -45,12 +45,15 @@ subtest 'Get current queue' => sub {
         [{limit => 3, counter => 9}, { expected_pos =>1 }],
     );
 
+    my $test_loop = IO::Async::Loop->new;
     for my $test_case (@tests) {
         my ($data, $result) = @{$test_case};
         my $limiter = WebService::Async::CustomerIO::RateLimiter->new(
             limit => $data->{limit},
             interval => 1
         );
+
+        $test_loop->add($limiter);
 
         $limiter->{counter} = $data->{counter};
 
@@ -62,6 +65,8 @@ subtest 'Get current queue' => sub {
 
 subtest 'Acquiring limiter' => sub  {
     my $limiter = WebService::Async::CustomerIO::RateLimiter->new(limit => 1, interval => 1);
+    my $test_loop = IO::Async::Loop->new;
+    $test_loop->add($limiter);
     $limiter = Test::MockObject::Extends->new($limiter);
     $limiter->set_true('_start_timer');
     ok $limiter->acquire->is_done,'Returns done future until limit is reached';
