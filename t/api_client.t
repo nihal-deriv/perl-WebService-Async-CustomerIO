@@ -7,6 +7,7 @@ use Test::MockObject;
 use Test::MockObject::Extends;
 
 use Future;
+use IO::Async::Loop;
 
 use WebService::Async::CustomerIO;
 use JSON::MaybeUTF8 qw(:v1);
@@ -26,10 +27,13 @@ subtest 'Creating API client' => sub {
 };
 
 subtest 'Getters methods' => sub {
+
+    my $test_loop = IO::Async::Loop->new;
     my $api = WebService::Async::CustomerIO->new(
         site_id => 'some_site_id',
         api_key => 'some_api_key',
     );
+    $test_loop->add($api);
 
     is $api->site_id, 'some_site_id', 'Get site_id';
     is $api->api_key, 'some_api_key', 'Get api_key';

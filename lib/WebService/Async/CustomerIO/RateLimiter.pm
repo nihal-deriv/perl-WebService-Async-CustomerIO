@@ -19,18 +19,20 @@ of request in time interval
 =head1 DESCRIPTION
 
 =cut
-sub configure {
-    my ($self, %args) = @_;
+
+
+sub _init {
+    my ($self, $args) = @_;
     for my $k (qw(limit interval)) {
-        die "Missing required argument: $k" unless exists $args{$k};
-        die "Invalid value for $k: $args{$k}" unless int($args{$k}) > 0;
-        $self->{$k} = delete $args{$k} if exists $args{$k};
+        die "Missing required argument: $k" unless exists $args->{$k};
+        die "Invalid value for $k: $args->{$k}" unless int($args->{$k}) > 0;
+        $self->{$k} = delete $args->{$k} if exists $args->{$k};
     }
 
     $self->{queue} = [];
     $self->{counter} = 0;
 
-    $self->next::method(%args);
+    $self->next::method($args);
 }
 
 =head2 interval
@@ -64,7 +66,7 @@ sub _current_queue {
     # +1 for getting correct position for edge cases like: limit 2, counter 4, should be 0
     my $pos = int(($self->{counter} - ($self->limit + 1)) / $self->limit);
 
-    $self->{queue}[$pos] //= {future => Future->new, counter=> 0};
+    $self->{queue}[$pos] //= {future => $self->loop->new_future, counter=> 0};
 
     return $self->{queue}[$pos];
 }
