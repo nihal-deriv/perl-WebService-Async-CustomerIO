@@ -232,6 +232,20 @@ sub emit_event {
     return $self->api->tracking_request(POST => $self->_get_uri('events'), \%param);
 }
 
+=head2 delete_customer
+
+Delete a customer
+
+Usage: C<< delete_customer() -> Future() >>
+
+=cut
+
+sub delete_customer {
+    my $self = shift;
+
+    return $self->api->tracking_request(DELETE => $self->_get_uri());
+}
+
 sub _get_uri {
     my ($self, @path) = @_;
 

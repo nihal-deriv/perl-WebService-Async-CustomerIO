@@ -136,6 +136,13 @@ subtest 'Api Methods tests' => sub {
         like $err, qr/^Missing required argument: device_id/, "Got error for missing device_id";
     };
 
+    subtest 'delete_customer' => sub {
+        my $response = $customer->delete_customer()->get;
+        is $response->{method}, 'DELETE', 'Method is correct';
+        is $response->{uri}, 'customers/some_id', 'URI is correct';
+        is_deeply $response->{data}, undef, 'Data is correct';
+    };
+
     subtest 'emit_event' => sub {
         my $response = $customer->emit_event(name => 'some_event', some => 'data')->get;
         is $response->{method}, 'POST', 'Method is correct';
