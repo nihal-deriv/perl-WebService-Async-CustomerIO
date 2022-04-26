@@ -15,7 +15,6 @@ WebService::Async::CustomerIO::Customer - Class for working with customer.
 
 use Carp qw();
 
-
 =head2 new
 
 Creates customer object. This method just creates an object, to sent this data to api, after creation should be called upsert method.
@@ -50,31 +49,31 @@ sub new {
 
 =cut
 
-sub api {shift->{api_client}}
+sub api { shift->{api_client} }
 
 =head2 id
 
 =cut
 
-sub id {shift->{id}}
+sub id { shift->{id} }
 
 =head2 email
 
 =cut
 
-sub email {shift->{email}}
+sub email { shift->{email} }
 
 =head2 created_at
 
 =cut
 
-sub created_at {shift->{created_at}}
+sub created_at { shift->{created_at} }
 
 =head2 attributes
 
 =cut
 
-sub attributes {shift->{attributes}}
+sub attributes { shift->{attributes} }
 
 =head2 upsert
 
@@ -90,13 +89,16 @@ sub upsert {
 
     my $attr = $self->attributes // {};
     my %user_params =
-        map { $_ => $attr->{$_} }
-        grep { defined $attr->{$_}}
+        map  { $_ => $attr->{$_} }
+        grep { defined $attr->{$_} }
         keys %$attr;
 
     @user_params{qw(email created_at)} = @{$self}{qw(email created_at)};
 
-    return $self->api->tracking_request(PUT => $self->_get_uri, \%user_params);
+    return $self->api->tracking_request(
+        PUT => $self->_get_uri,
+        \%user_params
+    );
 }
 
 =head2 set_attribute
@@ -110,9 +112,10 @@ Usage: C<< set_attribute($name, $value) -> Future() >>
 sub set_attribute {
     my ($self, $name, $val) = @_;
 
-    return $self->api->tracking_request(PUT => $self->_get_uri, {$name => $val});
+    return $self->api->tracking_request(
+        PUT => $self->_get_uri,
+        {$name => $val});
 }
-
 
 =head2 remove_attribute
 
@@ -125,7 +128,7 @@ Usage: C<< remove_attribute($name, $value) -> Future() >>
 sub remove_attribute {
     my ($self, $name) = @_;
 
-    return $self->set_attribute($name, '')
+    return $self->set_attribute($name, '');
 }
 
 =head2 suppress
@@ -155,7 +158,6 @@ sub unsuppress {
 
     return $self->api->tracking_request(POST => $self->_get_uri('unsuppress'));
 }
-
 
 =head2 upsert_device
 
@@ -191,7 +193,9 @@ sub upsert_device {
         last_used => $param{last_used},
     };
 
-    return $self->api->tracking_request(PUT => $self->_get_uri('devices'), {device => $device});
+    return $self->api->tracking_request(
+        PUT => $self->_get_uri('devices'),
+        {device => $device});
 }
 
 =head2 delete_device
@@ -229,7 +233,10 @@ sub emit_event {
 
     Carp::croak 'Missing required argument: name' unless $param{name};
 
-    return $self->api->tracking_request(POST => $self->_get_uri('events'), \%param);
+    return $self->api->tracking_request(
+        POST => $self->_get_uri('events'),
+        \%param
+    );
 }
 
 =head2 delete_customer
@@ -251,6 +258,5 @@ sub _get_uri {
 
     return join q{/} => ('customers', $self->id, @path);
 }
-
 
 1;

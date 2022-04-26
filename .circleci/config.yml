@@ -1,0 +1,38 @@
+version: 2.1
+orbs:
+  docker: circleci/docker@1.4.0
+jobs:
+  run_tests:
+    docker:
+      - image: deriv/dzil:latest
+        entrypoint: /bin/bash
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - cpanfile_v1-{{ arch }}-{{ checksum "cpanfile" }}
+      - run:
+          name: Install deps
+          command: |
+            cpanm -l deps --installdeps -n .
+            dzil authordeps | cpanm -l deps -n
+      - save_cache:
+          key: cpanfile_v1-{{ arch }}-{{ checksum "cpanfile" }}
+          paths:
+            - deps
+      - run:
+          name: Run test
+          command: |
+            export PERL5LIB=$(pwd)/deps/lib/perl5:$(pwd)/deps/lib/perl5/$(perl -MConfig -le'print $Config{archname}'):$PERL5LIB
+            dzil test
+      - run:
+          name: Author tests
+          command: |
+            export PERL5LIB=$(pwd)/deps/lib/perl5:$(pwd)/deps/lib/perl5/$(perl -MConfig -le'print $Config{archname}'):$PERL5LIB
+            dzil xtest
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - run_tests

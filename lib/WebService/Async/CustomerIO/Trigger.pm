@@ -45,19 +45,19 @@ sub new {
 
 =cut
 
-sub api {shift->{api_client}}
+sub api { shift->{api_client} }
 
 =head2 id
 
 =cut
 
-sub id {shift->{id}}
+sub id { shift->{id} }
 
 =head2 campaign_id
 
 =cut
 
-sub campaign_id {shift->{campaign_id}}
+sub campaign_id { shift->{campaign_id} }
 
 =head2 activate
 
@@ -73,20 +73,18 @@ sub activate {
     Carp::croak 'This trigger is already activated' if $self->id;
 
     my $campaign_id = $self->campaign_id;
-    return $self->api
-                ->api_request(POST => "campaigns/$campaign_id/triggers")
-                ->then(sub{
-                    my ($response) = @_;
+    return $self->api->api_request(POST => "campaigns/$campaign_id/triggers")->then(
+        sub {
+            my ($response) = @_;
 
-                    return Future->fail("UNEXPECTED_RESPONSE_FORMAT", 'customerio', $response)
-                        if !defined $response->{id};
+            return Future->fail("UNEXPECTED_RESPONSE_FORMAT", 'customerio', $response)
+                if !defined $response->{id};
 
-                    $self->{id} = $response->{id};
+            $self->{id} = $response->{id};
 
-                    return Future->done($response);
-                });
+            return Future->done($response);
+        });
 }
-
 
 =head2 find
 
@@ -99,12 +97,12 @@ Usage: C<<  find($api_client, $campaign_id, $trigger_id) -> Future($obj) >>
 sub find {
     my ($cls, $api, $campaign_id, $trigger_id) = @_;
 
-    return $api->api_request(GET => "campaigns/$campaign_id/triggers/$trigger_id")
-               ->then(sub{
-                   my ($result) = @_;
-                   my $trigger = $cls->new(%{$result}, api_client => $api);
-                   return Future->done($trigger);
-               });
+    return $api->api_request(GET => "campaigns/$campaign_id/triggers/$trigger_id")->then(
+        sub {
+            my ($result) = @_;
+            my $trigger = $cls->new(%{$result}, api_client => $api);
+            return Future->done($trigger);
+        });
 }
 
 =head2 get_errors
@@ -116,9 +114,9 @@ Usage: C<< get_errors($start, $limit) -> Future(%$result) >>
 =cut
 
 sub get_errors {
-    my($self, $start, $limit) = @_;
+    my ($self, $start, $limit) = @_;
 
-    my $trigger_id = $self->id;
+    my $trigger_id  = $self->id;
     my $campaign_id = $self->campaign_id;
 
     Carp::croak 'Trying to get errors for unsaved trigger' unless defined $trigger_id;
@@ -126,16 +124,10 @@ sub get_errors {
 
     Carp::croak "Invalid value for limit $limit" if defined $limit && int($limit) <= 0;
 
-    return $self->api
-                ->api_request(
-                    GET => "campaigns/$campaign_id/triggers/$trigger_id/errors",
-                    {
-                        (defined $start ? (start => int($start)) : ()),
-                        (defined $limit ? (limit => int($limit)) : ()),
-                    },
-                );
+    return $self->api->api_request(
+        GET => "campaigns/$campaign_id/triggers/$trigger_id/errors",
+        {(defined $start ? (start => int($start)) : ()), (defined $limit ? (limit => int($limit)) : ()),},
+    );
 }
-
-
 
 1;

@@ -16,4 +16,5 @@ on test => sub {
     requires 'Test::Fatal', 0;
     requires 'Test::MockObject', 0;
     requires 'Test::MockObject::Extends', 0;
+    requires 'Test::CheckDeps', 0;
 }

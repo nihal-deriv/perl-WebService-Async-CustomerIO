@@ -20,16 +20,15 @@ of request in time interval
 
 =cut
 
-
 sub _init {
     my ($self, $args) = @_;
     for my $k (qw(limit interval)) {
-        die "Missing required argument: $k" unless exists $args->{$k};
+        die "Missing required argument: $k"     unless exists $args->{$k};
         die "Invalid value for $k: $args->{$k}" unless int($args->{$k}) > 0;
         $self->{$k} = delete $args->{$k} if exists $args->{$k};
     }
 
-    $self->{queue} = [];
+    $self->{queue}   = [];
     $self->{counter} = 0;
 
     $self->next::method($args);
@@ -37,11 +36,13 @@ sub _init {
 
 =head2 interval
 =cut
-sub interval {shift->{interval}}
+
+sub interval { shift->{interval} }
 
 =head2 limit
 =cut
-sub limit {shift->{limit}}
+
+sub limit { shift->{limit} }
 
 =head2 acquire
 
@@ -49,6 +50,7 @@ Method checks availability for free slot.
 It returns future, when slot will be available, then future will be resolved.
 
 =cut
+
 sub acquire {
     my ($self) = @_;
 
@@ -66,7 +68,10 @@ sub _current_queue {
     # +1 for getting correct position for edge cases like: limit 2, counter 4, should be 0
     my $pos = int(($self->{counter} - ($self->limit + 1)) / $self->limit);
 
-    $self->{queue}[$pos] //= {future => $self->loop->new_future, counter=> 0};
+    $self->{queue}[$pos] //= {
+        future  => $self->loop->new_future,
+        counter => 0
+    };
 
     return $self->{queue}[$pos];
 }
@@ -74,10 +79,10 @@ sub _current_queue {
 sub _start_timer {
     my ($self) = @_;
 
-    $self->{timer} //=
-        $self->loop->delay_future(
-            after => $self->interval,
-        )->on_ready(sub {
+    $self->{timer} //= $self->loop->delay_future(
+        after => $self->interval,
+    )->on_ready(
+        sub {
             $self->{counter} = 0;
             delete $self->{timer};
 

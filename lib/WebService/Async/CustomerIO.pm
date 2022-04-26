@@ -23,6 +23,7 @@ use Future;
 use Net::Async::HTTP;
 use Carp qw();
 use JSON::MaybeUTF8 qw(:v1);
+use URI::Escape;
 
 use WebService::Async::CustomerIO::Customer;
 use WebService::Async::CustomerIO::RateLimiter;
@@ -49,6 +50,8 @@ Parameters:
 
 =item * C<api_key>
 
+=item * C<api_token>
+
 =back
 
 =cut
@@ -56,7 +59,7 @@ Parameters:
 sub _init {
     my ($self, $args) = @_;
 
-    for my $k (qw(site_id api_key)) {
+    for my $k (qw(site_id api_key api_token)) {
         Carp::croak "Missing required argument: $k" unless exists $args->{$k};
         $self->{$k} = delete $args->{$k} if exists $args->{$k};
     }
@@ -67,7 +70,7 @@ sub _init {
 sub configure {
     my ($self, %args) = @_;
 
-    for my $k (qw(site_id api_key)) {
+    for my $k (qw(site_id api_key api_token)) {
         $self->{$k} = delete $args{$k} if exists $args{$k};
     }
 
@@ -78,18 +81,24 @@ sub configure {
 
 =cut
 
-sub site_id {shift->{site_id}}
+sub site_id { shift->{site_id} }
 
 =head2 api_key
 
 =cut
 
-sub api_key {shift->{api_key}}
+sub api_key { shift->{api_key} }
+
+=head2 api_token
+
+=cut
+
+sub api_token { shift->{api_token} }
 
 =head2 API endpoints:
 
-There is 2 stable API for Customer.io, if you need to add a new method check 
-the L<documentation for API|https://customer.io/docs/api/> which endpoint 
+There is 2 stable API for Customer.io, if you need to add a new method check
+the L<documentation for API|https://customer.io/docs/api/> which endpoint
 you need to use:
 
 =over 4
@@ -97,8 +106,9 @@ you need to use:
 =item * C<Tracking API> - Behavioral Tracking API is used to identify and track
 customer data with Customer.io.
 
-=item * C<Regular API> - Currently, this endpoint is only used for sending
-L<API triggered broadcasts|https://customer.io/docs/api-triggered-broadcast-setup>.
+=item * C<Regular API> - Currently, this endpoint is used to fetch list of customers
+given an email and for sending
+L<API triggered broadcasts|https://customer.io/docs/api-triggered-broadcast-setup>
 
 =back
 
@@ -112,9 +122,10 @@ Usage: C<< tracking_request($method, $uri, $data) -> future($data) >>
 
 sub tracking_request {
     my ($self, $method, $uri, $data) = @_;
-    return $self->tracking_ratelimiter->acquire->then(sub {
-        $self->_request($method, join(q{/} => (TRACKING_END_POINT, $uri)), $data);
-    });
+    return $self->tracking_ratelimiter->acquire->then(
+        sub {
+            $self->_request($method, join(q{/} => (TRACKING_END_POINT, $uri)), $data);
+        });
 }
 
 =head2 api_request
@@ -128,9 +139,12 @@ Usage: C<< api_request($method, $uri, $data) -> future($data) >>
 sub api_request {
     my ($self, $method, $uri, $data) = @_;
 
-    return $self->api_ratelimiter->acquire->then(sub {
-        $self->_request($method, join(q{/} => (API_END_POINT, $uri)), $data);
-    });
+    Carp::croak('API token is missed') unless $self->api_token;
+
+    return $self->api_ratelimiter->acquire->then(
+        sub {
+            $self->_request($method, join(q{/} => (API_END_POINT, $uri)), $data, {authorization => 'Bearer ' . $self->api_token},);
+        });
 }
 
 =head2 api_ratelimiter
@@ -142,19 +156,7 @@ Getter returns RateLimmiter for regular API endpoint.
 sub api_ratelimiter {
     my ($self) = @_;
 
-    return $self->{api_ratelimiter} if $self->{api_ratelimiter};
-
-    Carp::croak "Can't use rate limiter without a loop" unless $self->loop;
-
-    $self->{api_ratelimiter} =
-        WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => REQUEST_PER_SECOND_LIMIT_API,
-            interval => 1,
-        );
-
-    $self->add_child($self->{api_ratelimiter});
-
-    return $self->{api_ratelimiter};
+    return $self->_ratelimiter(api => REQUEST_PER_SECOND_LIMIT_API);
 }
 
 =head2 tracking_ratelimiter
@@ -166,19 +168,24 @@ Getter returns RateLimmiter for tracking API endpoint.
 sub tracking_ratelimiter {
     my ($self) = @_;
 
-    return $self->{tracking_ratelimiter} if $self->{tracking_ratelimiter};
+    return $self->_ratelimiter(tracking => REQUEST_PER_SECOND_LIMIT_TRACKING);
+}
+
+sub _ratelimiter {
+    my ($self, $type, $limit) = @_;
+
+    return $self->{$type} if $self->{$type};
 
     Carp::croak "Can't use rate limiter without a loop" unless $self->loop;
 
-    $self->{tracking_ratelimiter} =
-        WebService::Async::CustomerIO::RateLimiter->new(
-            limit    => REQUEST_PER_SECOND_LIMIT_TRACKING,
-            interval => 1,
-        );
+    $self->{$type} = WebService::Async::CustomerIO::RateLimiter->new(
+        limit    => $limit,
+        interval => 1,
+    );
 
-    $self->add_child($self->{tracking_ratelimiter});
+    $self->add_child($self->{$type});
 
-    return $self->{tracking_ratelimiter};
+    return $self->{$type};
 }
 
 my %PATTERN_FOR_ERROR = (
@@ -189,45 +196,59 @@ my %PATTERN_FOR_ERROR = (
 );
 
 sub _request {
-    my ($self, $method, $uri, $data) = @_;
+    my ($self, $method, $uri, $data, $headers) = @_;
 
-    my $body = $data             ? encode_json_utf8($data)
-             : $method eq 'POST' ? q{}
-             :                     undef;
+    my $body =
+          $data             ? encode_json_utf8($data)
+        : $method eq 'POST' ? q{}
+        :                     undef;
 
     return $self->_ua->do_request(
-            method  => $method,
-            uri     => $uri,
-            user    => $self->site_id,
-            pass    => $self->api_key,
-            !defined $body ? () : (
-                content      => $body,
-                content_type => 'application/json',
-            ),
-    )->catch(sub {
-        my ($code_msg, $err_type, $response) = @_;
-        return Future->fail(@_) unless $err_type && $err_type eq 'http';
+        method => $method,
+        uri    => $uri,
+        $headers->{authorization} ? ()
+        : (
+            user => $self->site_id,
+            pass => $self->api_key,
+        ),
+        !defined $body ? ()
+        : (
+            content      => $body,
+            content_type => 'application/json',
+        ),
+        headers => $headers // {},
 
-        my $code = $response->code;
-        my $request_data = {method => $method, uri => $uri, data => $data};
+    )->catch(
+        sub {
+            my ($code_msg, $err_type, $response) = @_;
 
-        for my $error_code (keys %PATTERN_FOR_ERROR) {
-            next unless $code =~ /$PATTERN_FOR_ERROR{$error_code}/;
-            return Future->fail($error_code, 'customerio', $request_data);
+            return Future->fail(@_) unless $err_type && $err_type eq 'http';
+
+            my $code         = $response->code;
+            my $request_data = {
+                method => $method,
+                uri    => $uri,
+                data   => $data
+            };
+
+            for my $error_code (keys %PATTERN_FOR_ERROR) {
+                next unless $code =~ /$PATTERN_FOR_ERROR{$error_code}/;
+                return Future->fail($error_code, 'customerio', $request_data);
+            }
+
+            return Future->fail('UNEXPECTED_HTTP_CODE: ' . $code_msg, 'customerio', $response);
         }
-
-        return Future->fail('UNEXPECTED_HTTP_CODE: ' . $code_msg, 'customerio', $response);
-    })->then(sub {
-        my ($response) = @_;
-        try {
-            my $response_data = decode_json_utf8($response->content);
-            return Future->done($response_data);
-        } catch {
-            return Future->fail('UNEXPECTED_RESPONSE_FORMAT', 'customerio', $@, $response);
-        }
-    });
+    )->then(
+        sub {
+            my ($response) = @_;
+            try {
+                my $response_data = decode_json_utf8($response->content);
+                return Future->done($response_data);
+            } catch {
+                return Future->fail('UNEXPECTED_RESPONSE_FORMAT', 'customerio', $@, $response);
+            }
+        });
 }
-
 
 sub _ua {
     my ($self) = @_;
@@ -235,10 +256,10 @@ sub _ua {
     return $self->{ua} if $self->{ua};
 
     $self->{ua} = Net::Async::HTTP->new(
-        fail_on_error => 1,
-        decode_content => 0,
-        pipeline => 0,
-        stall_timeout => 60,
+        fail_on_error            => 1,
+        decode_content           => 0,
+        pipeline                 => 0,
+        stall_timeout            => 60,
         max_connections_per_host => 4,
         user_agent => 'Mozilla/4.0 (WebService::Async::CustomerIO; BINARY@cpan.org; https://metacpan.org/pod/WebService::Async::CustomerIO)',
     );
@@ -299,9 +320,12 @@ Usage: C<< new_customer(%params) -> obj >>
 =cut
 
 sub emit_event {
-    my ($self, %params) =  @_;
+    my ($self, %params) = @_;
 
-    return $self->tracking_request(POST => 'events', \%params);
+    return $self->tracking_request(
+        POST => 'events',
+        \%params
+    );
 }
 
 =head2 add_to_segment
@@ -316,16 +340,18 @@ sub add_to_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
     Carp::croak 'Missing required attribute: segment_id' unless $segment_id;
-    Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
+    Carp::croak 'Invalid value for customers_ids'        unless ref $customers_ids eq 'ARRAY';
 
-    return $self->tracking_request(POST => "segments/$segment_id/add_customers", {ids => $customers_ids});
+    return $self->tracking_request(
+        POST => "segments/$segment_id/add_customers",
+        {ids => $customers_ids});
 }
 
 =head2 remove_from_segment
 
-Remove people from a manual segment.
+remove people from a manual segment.
 
-Usage: C<< remove_from_segment($segment_id, @$customer_ids) -> Future() >>
+usage: c<< remove_from_segment($segment_id, @$customer_ids) -> future() >>
 
 =cut
 
@@ -333,12 +359,42 @@ sub remove_from_segment {
     my ($self, $segment_id, $customers_ids) = @_;
 
     Carp::croak 'Missing required attribute: segment_id' unless $segment_id;
-    Carp::croak 'Invalid value for customers_ids' unless ref $customers_ids eq 'ARRAY';
+    Carp::croak 'Invalid value for customers_ids'        unless ref $customers_ids eq 'ARRAY';
 
-    return $self->tracking_request(POST => "segments/$segment_id/remove_customers", {ids => $customers_ids});
+    return $self->tracking_request(
+        POST => "segments/$segment_id/remove_customers",
+        {ids => $customers_ids});
 }
 
+=head2 get_customers_by_email
 
+Query Customer.io API for list of clients, who has requested email address.
 
+usage: c<< get_customers_by_email($email)->future([$customer_obj1, ...]) >>
+
+=cut
+
+sub get_customers_by_email {
+    my ($self, $email) = @_;
+
+    Carp::croak 'Missing required argument: email' unless $email;
+
+    return $self->api_request(GET => "customers?email=" . uri_escape_utf8($email))->then(
+        sub {
+            my ($resp) = @_;
+
+            if (ref $resp ne 'HASH' || ref $resp->{results} ne 'ARRAY') {
+                return Future->fail('UNEXPECTED_RESPONSE_FORMAT', 'customerio', 'Unexpected response format is recived', $resp);
+            }
+
+            try {
+                my @customers = map { WebService::Async::CustomerIO::Customer->new($_->%*, api_client => $self) } $resp->{results}->@*;
+                return Future->done(\@customers);
+            } catch ($e) {
+                return Future->fail('UNEXPECTED_RESPONSE_FORMAT', 'customerio', $e, $resp);
+            }
+
+        });
+}
 
 1;
