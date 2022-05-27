@@ -65,11 +65,11 @@ subtest 'Getters methods' => sub {
     is $api->api_key,   'some_api_key',   'Get api_key';
     is $api->api_token, 'some_api_token', 'Get api_token';
 
-    isa_ok($api->api_ratelimiter,      'WebService::Async::CustomerIO::RateLimiter');
-    isa_ok($api->tracking_ratelimiter, 'WebService::Async::CustomerIO::RateLimiter');
-
-    is $api->api_ratelimiter->limit,      10, 'Correct limit for general api';
-    is $api->tracking_ratelimiter->limit, 30, 'Correct limit for tracking api';
+    for my $type ('track', 'api', 'trigger') {
+        my $obj = $api->ratelimiter($type);
+        isa_ok($obj, 'WebService::Async::CustomerIO::RateLimiter');
+        is ($obj, $api->ratelimiter($type), 'same instance returned on second call');
+    }
 };
 
 subtest 'Checking endpoints' => sub {
@@ -84,11 +84,10 @@ subtest 'Checking endpoints' => sub {
 
     my $limiter = Test::MockObject->new();
     $limiter->mock(acquire => sub { Future->done });
-    $api->mock(api_ratelimiter      => sub { $limiter });
-    $api->mock(tracking_ratelimiter => sub { $limiter });
+    $api->mock(ratelimiter => sub { $limiter });
 
     is $api->tracking_request(GET => 'test')->get, 'https://track.customer.io/api/v1/test', 'Correct end-point for tracking api';
-    is $api->api_request(GET => 'test')->get,      'https://api.customer.io/v1/api/test',   'Correct end-point for general api';
+    is $api->api_request(GET => 'test')->get,      'https://api.customer.io/v1/test',   'Correct end-point for general api';
 };
 
 subtest 'Making request to api' => sub {
@@ -290,4 +289,3 @@ subtest 'Search customers by email' => sub {
 };
 
 done_testing();
-

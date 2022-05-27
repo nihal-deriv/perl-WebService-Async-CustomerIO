@@ -65,23 +65,7 @@ subtest 'Api Methods tests' => sub {
         is $trigger->id, 1, 'id is updated';
     };
 
-    subtest 'find' => sub {
-        my $api = WebService::Async::CustomerIO->new(
-            site_id   => 'some_site_id',
-            api_key   => 'some_api_key',
-            api_token => 'some_api_key'
-        );
-
-        $api = Test::MockObject::Extends->new($api);
-        $api->mock(api_request => sub { Future->done({campaign_id => 1, id => 2}) });
-
-        my $trigger = WebService::Async::CustomerIO::Trigger->find($api, 1, 1)->get;
-
-        is $trigger->id,          2, 'Trigger id is correct';
-        is $trigger->campaign_id, 1, 'campaign id is correct';
-    };
-
-    subtest 'get_errors' => sub {
+    subtest 'status' => sub {
         my $api = WebService::Async::CustomerIO->new(
             site_id   => 'some_site_id',
             api_key   => 'some_api_key',
@@ -102,12 +86,41 @@ subtest 'Api Methods tests' => sub {
             id          => 1,
         );
 
-        my $response = $trigger->get_errors->get;
+        my $response = $trigger->status->get;
 
-        is $response->{method}, 'GET',                                 'Method is correct';
+        is $response->{method}, 'GET',                               'Method is correct';
+        is $response->{uri},    'campaigns/some_id/triggers/1', 'URI is correct';
+        is $response->{data}, undef, 'Data is correct';
+    };
+
+    subtest 'errors' => sub {
+        my $api = WebService::Async::CustomerIO->new(
+            site_id   => 'some_site_id',
+            api_key   => 'some_api_key',
+            api_token => 'some_api_key'
+        );
+
+        $api = Test::MockObject::Extends->new($api);
+        $api->mock(
+            api_request => sub {
+                my %h;
+                @h{qw(method uri data)} = @_[1 .. 3];
+                Future->done(\%h);
+            });
+
+        my $trigger = WebService::Async::CustomerIO::Trigger->new(
+            campaign_id => 'some_id',
+            api_client  => $api,
+            id          => 1,
+        );
+
+        my $response = $trigger->errors->get;
+
+        is $response->{method}, 'GET',                               'Method is correct';
         is $response->{uri},    'campaigns/some_id/triggers/1/errors', 'URI is correct';
         is_deeply $response->{data}, {}, 'Data is correct';
     };
+
 };
 
 done_testing();

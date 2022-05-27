@@ -68,12 +68,12 @@ Usage: C<< activate(%param) -> Future($obj) >>
 =cut
 
 sub activate {
-    my ($self, %param) = @_;
+    my ($self, $params) = @_;
 
     Carp::croak 'This trigger is already activated' if $self->id;
 
     my $campaign_id = $self->campaign_id;
-    return $self->api->api_request(POST => "campaigns/$campaign_id/triggers")->then(
+    return $self->api->api_request('POST', "campaigns/$campaign_id/triggers", $params, 'trigger')->then(
         sub {
             my ($response) = @_;
 
@@ -86,23 +86,20 @@ sub activate {
         });
 }
 
-=head2 find
+=head2 status
 
 Retrieve status of a broadcast
 
-Usage: C<<  find($api_client, $campaign_id, $trigger_id) -> Future($obj) >>
+Usage: C<<  status() -> Future($response) >>
 
 =cut
 
-sub find {
-    my ($cls, $api, $campaign_id, $trigger_id) = @_;
+sub status {
+    my ($self) = @_;
 
-    return $api->api_request(GET => "campaigns/$campaign_id/triggers/$trigger_id")->then(
-        sub {
-            my ($result) = @_;
-            my $trigger = $cls->new(%{$result}, api_client => $api);
-            return Future->done($trigger);
-        });
+    Carp::croak 'This trigger has not been activated yet' unless $self->id;
+
+    return $self->api->api_request(GET => 'campaigns/'.$self->campaign_id.'/triggers/'.$self->id);
 }
 
 =head2 get_errors
@@ -113,7 +110,7 @@ Usage: C<< get_errors($start, $limit) -> Future(%$result) >>
 
 =cut
 
-sub get_errors {
+sub errors {
     my ($self, $start, $limit) = @_;
 
     my $trigger_id  = $self->id;
@@ -121,7 +118,6 @@ sub get_errors {
 
     Carp::croak 'Trying to get errors for unsaved trigger' unless defined $trigger_id;
     Carp::croak "Invalid value for start $start" if defined $start && int($start) < 0;
-
     Carp::croak "Invalid value for limit $limit" if defined $limit && int($limit) <= 0;
 
     return $self->api->api_request(
