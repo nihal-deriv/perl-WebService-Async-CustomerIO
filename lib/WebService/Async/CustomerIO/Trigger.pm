@@ -15,9 +15,11 @@ WebService::Async::CustomerIO::Trigger - Class for working with triggers end poi
 
 use Carp qw();
 
+## VERSION
+
 =head2 new
 
-Creates a new api client object
+Creates a new API client object
 
 Usage: C<< new(%params) -> obj >>
 
@@ -45,19 +47,19 @@ sub new {
 
 =cut
 
-sub api { shift->{api_client} }
+sub api { return shift->{api_client} }
 
 =head2 id
 
 =cut
 
-sub id { shift->{id} }
+sub id { return shift->{id} }
 
 =head2 campaign_id
 
 =cut
 
-sub campaign_id { shift->{campaign_id} }
+sub campaign_id { return shift->{campaign_id} }
 
 =head2 activate
 
@@ -99,7 +101,7 @@ sub status {
 
     Carp::croak 'This trigger has not been activated yet' unless $self->id;
 
-    return $self->api->api_request(GET => 'campaigns/'.$self->campaign_id.'/triggers/'.$self->id);
+    return $self->api->api_request(GET => 'campaigns/' . $self->campaign_id . '/triggers/' . $self->id);
 }
 
 =head2 get_errors

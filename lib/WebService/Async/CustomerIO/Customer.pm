@@ -15,6 +15,8 @@ WebService::Async::CustomerIO::Customer - Class for working with customer.
 
 use Carp qw();
 
+## VERSION
+
 =head2 new
 
 Creates customer object. This method just creates an object, to sent this data to api, after creation should be called upsert method.
@@ -49,31 +51,31 @@ sub new {
 
 =cut
 
-sub api { shift->{api_client} }
+sub api { return shift->{api_client} }
 
 =head2 id
 
 =cut
 
-sub id { shift->{id} }
+sub id { return shift->{id} }
 
 =head2 email
 
 =cut
 
-sub email { shift->{email} }
+sub email { return shift->{email} }
 
 =head2 created_at
 
 =cut
 
-sub created_at { shift->{created_at} }
+sub created_at { return shift->{created_at} }
 
 =head2 attributes
 
 =cut
 
-sub attributes { shift->{attributes} }
+sub attributes { return shift->{attributes} }
 
 =head2 upsert
 

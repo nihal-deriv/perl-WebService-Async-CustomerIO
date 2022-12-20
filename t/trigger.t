@@ -88,9 +88,9 @@ subtest 'Api Methods tests' => sub {
 
         my $response = $trigger->status->get;
 
-        is $response->{method}, 'GET',                               'Method is correct';
+        is $response->{method}, 'GET',                          'Method is correct';
         is $response->{uri},    'campaigns/some_id/triggers/1', 'URI is correct';
-        is $response->{data}, undef, 'Data is correct';
+        is $response->{data},   undef,                          'Data is correct';
     };
 
     subtest 'errors' => sub {
@@ -116,7 +116,7 @@ subtest 'Api Methods tests' => sub {
 
         my $response = $trigger->errors->get;
 
-        is $response->{method}, 'GET',                               'Method is correct';
+        is $response->{method}, 'GET',                                 'Method is correct';
         is $response->{uri},    'campaigns/some_id/triggers/1/errors', 'URI is correct';
         is_deeply $response->{data}, {}, 'Data is correct';
     };

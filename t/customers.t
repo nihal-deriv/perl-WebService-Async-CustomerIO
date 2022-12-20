@@ -41,7 +41,7 @@ subtest 'Getters methods' => sub {
     is $customer->api,        'some_api_client',  'Get api client';
     is $customer->id,         'some_id',          'Get id';
     is $customer->email,      'user@example.com', 'Get email';
-    is $customer->created_at, $time, 'created_at';
+    is $customer->created_at, $time,              'created_at';
     is_deeply $customer->attributes, {some => 'data'}, 'Get attributes';
 };
 
@@ -98,16 +98,16 @@ subtest 'Api Methods tests' => sub {
 
     subtest 'suppress' => sub {
         my $response = $customer->suppress->get;
-        is $response->{method},      'POST',                       'Method is correct';
-        is $response->{uri},         'customers/some_id/suppress', 'URI is correct';
-        is_deeply $response->{data}, undef,                        'Data is correct';
+        is $response->{method}, 'POST',                       'Method is correct';
+        is $response->{uri},    'customers/some_id/suppress', 'URI is correct';
+        is_deeply $response->{data}, undef, 'Data is correct';
     };
 
     subtest 'unsuppress' => sub {
         my $response = $customer->unsuppress->get;
-        is $response->{method},      'POST',                         'Method is correct';
-        is $response->{uri},         'customers/some_id/unsuppress', 'URI is correct';
-        is_deeply $response->{data}, undef,                          'Data is correct';
+        is $response->{method}, 'POST',                         'Method is correct';
+        is $response->{uri},    'customers/some_id/unsuppress', 'URI is correct';
+        is_deeply $response->{data}, undef, 'Data is correct';
     };
 
     subtest 'upsert_device' => sub {
@@ -155,18 +155,18 @@ subtest 'Api Methods tests' => sub {
 
     subtest 'delete_device' => sub {
         my $response = $customer->delete_device('some_device_id')->get;
-        is $response->{method},      'DELETE',                                   'Method is correct';
-        is $response->{uri},         'customers/some_id/devices/some_device_id', 'URI is correct';
-        is_deeply $response->{data}, undef,                                      'Data is correct';
+        is $response->{method}, 'DELETE',                                   'Method is correct';
+        is $response->{uri},    'customers/some_id/devices/some_device_id', 'URI is correct';
+        is_deeply $response->{data}, undef, 'Data is correct';
         my $err = exception { $customer->delete_device };
         like $err, qr/^Missing required argument: device_id/, "Got error for missing device_id";
     };
 
     subtest 'delete_customer' => sub {
         my $response = $customer->delete_customer()->get;
-        is $response->{method},      'DELETE',            'Method is correct';
-        is $response->{uri},         'customers/some_id', 'URI is correct';
-        is_deeply $response->{data}, undef,               'Data is correct';
+        is $response->{method}, 'DELETE',            'Method is correct';
+        is $response->{uri},    'customers/some_id', 'URI is correct';
+        is_deeply $response->{data}, undef, 'Data is correct';
     };
 
     subtest 'emit_event' => sub {

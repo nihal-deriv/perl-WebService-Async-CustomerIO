@@ -68,7 +68,7 @@ subtest 'Getters methods' => sub {
     for my $type ('track', 'api', 'trigger') {
         my $obj = $api->ratelimiter($type);
         isa_ok($obj, 'WebService::Async::CustomerIO::RateLimiter');
-        is ($obj, $api->ratelimiter($type), 'same instance returned on second call');
+        is($obj, $api->ratelimiter($type), 'same instance returned on second call');
     }
 };
 
@@ -87,7 +87,7 @@ subtest 'Checking endpoints' => sub {
     $api->mock(ratelimiter => sub { $limiter });
 
     is $api->tracking_request(GET => 'test')->get, 'https://track.customer.io/api/v1/test', 'Correct end-point for tracking api';
-    is $api->api_request(GET => 'test')->get,      'https://api.customer.io/v1/test',   'Correct end-point for general api';
+    is $api->api_request(GET => 'test')->get,      'https://api.customer.io/v1/test',       'Correct end-point for general api';
 };
 
 subtest 'Making request to api' => sub {
@@ -283,9 +283,9 @@ subtest 'Search customers by email' => sub {
         });
 
     my $response = $api->get_customers_by_email('hugh.mann@example.com')->get;
-    is ref $response, 'ARRAY', ' Method returns list';
+    is ref $response,      'ARRAY',                                   ' Method returns list';
     is ref $response->[0], 'WebService::Async::CustomerIO::Customer', 'Object created correctly';
-    is $response->[0]->id, 2, 'Object has correct data';
+    is $response->[0]->id, 2,                                         'Object has correct data';
 };
 
 done_testing();

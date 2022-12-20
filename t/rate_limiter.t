@@ -155,7 +155,7 @@ subtest 'Acquiring limiter' => sub {
     $test_loop->add($limiter);
     $limiter = Test::MockObject::Extends->new($limiter);
     $limiter->set_true('_start_timer');
-    ok $limiter->acquire->is_done, 'Returns done future until limit is reached';
+    ok $limiter->acquire->is_done,  'Returns done future until limit is reached';
     ok !$limiter->acquire->is_done, 'Returns undone future when limit is reached';
     is scalar(@{$limiter->{queue}}), 1, 'Queue contains single element';
 };

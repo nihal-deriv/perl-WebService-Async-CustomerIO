@@ -9,6 +9,8 @@ use mro;
 
 use parent qw(IO::Async::Notifier);
 
+## VERSION
+
 =head1 NAME
 WebService::Async::CustomerIO::RateLimitter - This class provide possibility to limit amount
 of request in time interval
@@ -31,18 +33,18 @@ sub _init {
     $self->{queue}   = [];
     $self->{counter} = 0;
 
-    $self->next::method($args);
+    return $self->next::method($args);
 }
 
 =head2 interval
 =cut
 
-sub interval { shift->{interval} }
+sub interval { return shift->{interval} }
 
 =head2 limit
 =cut
 
-sub limit { shift->{limit} }
+sub limit { return shift->{limit} }
 
 =head2 acquire
 

@@ -3,7 +3,7 @@ package WebService::Async::CustomerIO;
 use strict;
 use warnings;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 =head1 NAME
 
@@ -21,7 +21,7 @@ use mro;
 use Syntax::Keyword::Try;
 use Future;
 use Net::Async::HTTP;
-use Carp qw();
+use Carp            qw();
 use JSON::MaybeUTF8 qw(:v1);
 use URI::Escape;
 
@@ -30,18 +30,26 @@ use WebService::Async::CustomerIO::RateLimiter;
 use WebService::Async::CustomerIO::Trigger;
 
 use constant {
-    TRACKING_END_POINT                => 'https://track.customer.io/api/v1',
-    API_END_POINT                     => 'https://api.customer.io/v1',
-    RATE_LIMITS => {
-        track   => {limit =>30, interval => 1},
-        api     => {limit => 10, interval => 1},
-        trigger => {limit => 1, interval => 10},  # https://www.customer.io/docs/api/#operation/triggerBroadcast
-    }
-};
+    TRACKING_END_POINT => 'https://track.customer.io/api/v1',
+    API_END_POINT      => 'https://api.customer.io/v1',
+    RATE_LIMITS        => {
+        track => {
+            limit    => 30,
+            interval => 1
+        },
+        api => {
+            limit    => 10,
+            interval => 1
+        },
+        trigger => {
+            limit    => 1,
+            interval => 10
+        },    # https://www.customer.io/docs/api/#operation/triggerBroadcast
+    }};
 
 =head2 new
 
-Creates a new api client object
+Creates a new API client object
 
 Usage: C<< new(%params) -> obj >>
 
@@ -67,7 +75,7 @@ sub _init {
         $self->{$k} = delete $args->{$k} if exists $args->{$k};
     }
 
-    $self->next::method($args);
+    return $self->next::method($args);
 }
 
 sub configure {
@@ -77,26 +85,26 @@ sub configure {
         $self->{$k} = delete $args{$k} if exists $args{$k};
     }
 
-    $self->next::method(%args);
+    return $self->next::method(%args);
 }
 
 =head2 site_id
 
 =cut
 
-sub site_id { shift->{site_id} }
+sub site_id { return shift->{site_id} }
 
 =head2 api_key
 
 =cut
 
-sub api_key { shift->{api_key} }
+sub api_key { return shift->{api_key} }
 
 =head2 api_token
 
 =cut
 
-sub api_token { shift->{api_token} }
+sub api_token { return shift->{api_token} }
 
 =head2 API endpoints:
 
@@ -341,7 +349,7 @@ sub get_customers_by_email {
 
     Carp::croak 'Missing required argument: email' unless $email;
 
-    return $self->api_request(GET => "customers?email=".uri_escape_utf8($email))->then(
+    return $self->api_request(GET => "customers?email=" . uri_escape_utf8($email))->then(
         sub {
             my ($resp) = @_;
 
