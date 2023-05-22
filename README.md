@@ -24,6 +24,10 @@ Parameters:
 
 ## api\_token
 
+## api\_uri
+
+## track\_uri
+
 ## API endpoints:
 
 There is 2 stable API for Customer.io, if you need to add a new method check
@@ -83,3 +87,5 @@ usage: c<< remove\_from\_segment($segment\_id, @$customer\_ids) -> future() >>
 Query Customer.io API for list of clients, who has requested email address.
 
 usage: c<< get\_customers\_by\_email($email)->future(\[$customer\_obj1, ...\]) >>
+
+## send\_transactional
