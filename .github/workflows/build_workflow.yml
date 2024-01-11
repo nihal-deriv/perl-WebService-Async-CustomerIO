@@ -6,6 +6,9 @@ on:
     branches:
     - master
   pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -27,7 +30,7 @@ jobs:
     - name: Install Dzil
       run: cpm install -g --no-test Dist::Zilla Dist::Zilla::App::Command::cover ExtUtils::MakeMaker
     - name: Install dzil author dependencies
-      run: |-
+      run: |
         cpm install --no-test -g \
         -w 2 \
         --mirror=http://cpan.cpantesters.org/ $(dzil authordeps --missing)
@@ -54,7 +57,7 @@ jobs:
     - name: Install Dzil
       run: cpm install -g --no-test Dist::Zilla Dist::Zilla::App::Command::cover ExtUtils::MakeMaker
     - name: Install dzil author dependencies
-      run: |-
+      run: |
         cpm install --no-test -g \
         -w 2 \
         --mirror=http://cpan.cpantesters.org/ $(dzil authordeps --missing)
@@ -67,14 +70,14 @@ jobs:
     - name: setup PAUSE account
       run: echo -e "user $PAUSE_USER\npassword $PAUSE_PASSWORD\n" >> ~/.pause
     - name: setup git
-      run: |-
+      run: |
         git config --global user.email "github-actions@binary.com"
         git config --global user.name "github-actions"
         # set remote github because dzil will push to github
         # https://metacpan.org/release/DERIV/Dist-Zilla-PluginBundle-Author-DERIV-0.003/source/lib/Dist/Zilla/PluginBundle/Author/DERIV.pm#L122
         git remote add github $(git remote get-url origin)
     - name: Release to PAUSE
-      run: |-
+      run: |
         if grep -Pzq '\{\{\$NEXT\}\}\n\s*\n' Changes
         then
             echo "No changes, no need release"
